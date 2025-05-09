@@ -27,27 +27,26 @@ public class GitHubHelper
         };
 
         var githubCommits = await _githubClient.Repository.Commit.GetAll(_owner, _repo, commitRequest);
-        var commits = new List<Commit>();
+        return ProcessCommits(githubCommits, untilSha);
 
-        foreach (var githubCommit in githubCommits)
+        IEnumerable<Commit> ProcessCommits(IReadOnlyList<GitHubCommit> githubCommits, string untilSha)
         {
-            var commitUri =
-                new Uri(githubCommit.HtmlUrl ?? $"https://github.com/{_owner}/{_repo}/commit/{githubCommit.Sha}");
-
-            var newCommit = new Commit(
-                Sha: githubCommit.Sha,
-                Message: githubCommit.Commit.Message.Split('\n').First(),
-                PullRequestUrl: commitUri);
-
-            commits.Add(newCommit);
-
-            if (githubCommit.Sha.StartsWith(untilSha))
+            foreach (var commit in githubCommits)
             {
-                break;
+                var commitUri =
+                    new Uri(commit.HtmlUrl ?? $"https://github.com/{_owner}/{_repo}/commit/{commit.Sha}");
+
+                yield return new Commit(
+                    Sha: commit.Sha,
+                    Message: commit.Commit.Message.Split('\n').First(),
+                    PullRequestUrl: commitUri);
+
+                if (commit.Sha.StartsWith(untilSha))
+                {
+                    break;
+                }
             }
         }
-
-        return commits;
     }
 
     private GitHubClient CreateGitHubClient()
