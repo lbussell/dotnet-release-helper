@@ -36,8 +36,8 @@ class Commands
     }
 
     /// <summary>
-    /// Interactively pick commits from a branch up to a specific commit sha. Prints a summary of selected commits in
-    /// markdown format as well as the git cherry-pick command to run.
+    /// Interactively pick commits from a branch up to a specific commit sha. Prints a summary of the selected commits
+    /// in an unordered markdown list as well as prints a git command to cherry-pick all of the selected commits.
     /// </summary>
     public async Task PickCommits(
         string toSha,
@@ -63,10 +63,9 @@ class Commands
                 Commit: {commit.Sha}
                 Author: {commit.Author}
                 Pull Request: {commit.PullRequestUrl}
-                Include this commit? (y/n):
                 """);
 
-            var accepted = AskForUserAcceptance();
+            var accepted = AskYesOrNo($"Include this commit?");
             if (accepted)
             {
                 selectedCommits.Add(commit);
@@ -96,13 +95,18 @@ class Commands
             {gitCherryPickCommand} {commitList}
 
             """);
-
     }
 
-    private static bool AskForUserAcceptance()
+    /// <summary>
+    /// Asks the user to respond "yes" or "no" by prompting for a single character console input.
+    /// </summary>
+    /// <param name="message">This will be printed before prompting the user for input.</param>
+    /// <returns>True if the user responds with "y", false if the user responds with any other character</returns>
+    private static bool AskYesOrNo(string message)
     {
-        var accepted = Console.ReadKey().KeyChar.ToString().Equals("y", StringComparison.OrdinalIgnoreCase);
+        Console.WriteLine($"{message} (y/n)");
+        var userSaidYes = Console.ReadKey().KeyChar.ToString().Equals("y", StringComparison.OrdinalIgnoreCase);
         Console.WriteLine();
-        return accepted;
+        return userSaidYes;
     }
 }
