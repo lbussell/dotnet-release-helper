@@ -31,6 +31,8 @@ Options:
 ### Pick commits
 
 ```
+Usage: pick-commits [options...] [-h|--help] [--version]
+
 Interactively pick commits from a branch up to a specific commit sha. Prints a summary of the selected commits
      in an unordered markdown list as well as prints a git command to cherry-pick all of the selected commits.
 
