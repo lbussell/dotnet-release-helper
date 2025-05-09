@@ -7,6 +7,9 @@ app.Run(args);
 
 class Commands
 {
+    /// <summary>
+    /// List commits from a branch up to a specific commit sha.
+    /// </summary>
     public async Task Commits(
         string toSha,
         string owner = "dotnet",
@@ -49,9 +52,8 @@ class Commands
         // Reverse the order of commits to show the oldest first
         commits = commits.Reverse();
 
+        Console.WriteLine("\nSelect commits to include.\n");
         var selectedCommits = new List<Commit>();
-
-        Console.WriteLine("Select commits to include.\n");
 
         foreach (var commit in commits)
         {
