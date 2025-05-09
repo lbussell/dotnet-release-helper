@@ -1,11 +1,12 @@
 using Microsoft.Extensions.Configuration;
 using Octokit;
+using System.Text.RegularExpressions;
 
 namespace ReleaseHelper.Cli;
 
-public record Commit(string Sha, string Message, Uri PullRequestUrl);
+public record Commit(string Sha, string Message, Uri? PullRequestUrl, string Author);
 
-public class GitHubHelper
+public partial class GitHubHelper
 {
     private readonly GitHubClient _githubClient;
     private readonly string _owner;
@@ -33,13 +34,28 @@ public class GitHubHelper
         {
             foreach (var commit in githubCommits)
             {
-                var commitUri =
-                    new Uri(commit.HtmlUrl ?? $"https://github.com/{_owner}/{_repo}/commit/{commit.Sha}");
+                var commitMessage = commit.Commit.Message;
+                var firstLine = commitMessage.Split('\n').First();
+
+                // Extract PR number from commit message and create PR URL
+                var prNumber =
+                    PullRequestNumberPattern
+                        .Matches(commitMessage)
+                        .FirstOrDefault()?
+                        .Value;
+
+                var pullRequestUrl =
+                    prNumber is null ?  commit.HtmlUrl
+                        : $"https://github.com/{_owner}/{_repo}/pull/{prNumber}";
+
+                // Get author name - prefer the GitHub user login if available, fall back to commit author name
+                string author = commit.Author?.Login ?? commit.Commit.Author.Name;
 
                 yield return new Commit(
                     Sha: commit.Sha,
-                    Message: commit.Commit.Message.Split('\n').First(),
-                    PullRequestUrl: commitUri);
+                    Message: firstLine,
+                    PullRequestUrl: new Uri(pullRequestUrl),
+                    Author: author);
 
                 if (commit.Sha.StartsWith(untilSha))
                 {
@@ -64,4 +80,7 @@ public class GitHubHelper
 
         return client;
     }
+
+    [GeneratedRegex(@"\(#(\d+)\)", RegexOptions.Compiled)]
+    private static partial Regex PullRequestNumberPattern { get; }
 }

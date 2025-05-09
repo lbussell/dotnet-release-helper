@@ -18,9 +18,17 @@ class Commands
 
         var commits = await gitHubHelper.GetCommits(since: twoMonthsAgo, untilSha: toSha, branch: branch);
 
+        Console.WriteLine();
         foreach (var commit in commits)
         {
-            Console.WriteLine($"{commit.Sha} - {commit.Message}");
+            Console.WriteLine(
+                $"""
+                {commit.Message}
+                Commit: {commit.Sha}
+                Author: {commit.Author}
+                Pull Request: {commit.PullRequestUrl}
+
+                """);
         }
     }
 }
