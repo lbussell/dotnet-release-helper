@@ -38,14 +38,14 @@ public partial class GitHubHelper
                 var firstLine = commitMessage.Split('\n').First();
 
                 // Extract PR number from commit message and create PR URL
-                var prNumber =
-                    PullRequestNumberPattern
-                        .Matches(commitMessage)
-                        .FirstOrDefault()?
-                        .Value;
+                var prMatch = PullRequestNumberPattern
+                    .Matches(commitMessage)
+                    .FirstOrDefault();
+
+                var prNumber = prMatch?.Groups[1].Value; // Get just the number from the regex capture group
 
                 var pullRequestUrl =
-                    prNumber is null ?  commit.HtmlUrl
+                    prNumber is null ? commit.HtmlUrl
                         : $"https://github.com/{_owner}/{_repo}/pull/{prNumber}";
 
                 // Get author name - prefer the GitHub user login if available, fall back to commit author name
