@@ -1,5 +1,8 @@
 # dotnet-release-helper
 
+> [!CAUTION]
+> This repo is archived and will not be maintained any longer. Please don't use it for anything important. Thanks.
+
 ## What is this?
 
 This is a tool that I use to make releasing .NET container images easier.
